@@ -19,6 +19,8 @@ local.properties
 # Locally stored "Eclipse launch configurations"
 *.launch
 
+# Maven
+target/
 
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
