@@ -114,4 +114,16 @@ public class Util {
 		 return extractedDataList;
 	}
 	
+	public static String getFileExtension(String filename) {
+		String extension = "";
+
+		int idx = filename.lastIndexOf('.');
+		
+		if (idx > 0) {
+		    extension = filename.substring(idx);
+		}
+		
+		return extension;
+	}
+	
 }

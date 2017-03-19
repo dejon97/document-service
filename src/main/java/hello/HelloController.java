@@ -144,7 +144,9 @@ public class HelloController {
 				
 				for (int idx = 0; idx < fileList.length; idx++) {
 					
-					File tmpFile = File.createTempFile("ephesoft-tmp-file-name", ".pdf");
+					String extension = Util.getFileExtension(fileList[idx].getOriginalFilename());
+					
+					File tmpFile = File.createTempFile("ephesoft-tmp-file-name", extension);
 				   	System.out.println("Temp file : " + tmpFile.getAbsolutePath());
 			    	
 				   	inputStream  = fileList[idx].getInputStream();
