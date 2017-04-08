@@ -8,9 +8,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -33,11 +38,13 @@ import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.jdom.Document;
+//import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.nuxeo.client.api.NuxeoClient;
+import org.nuxeo.client.api.objects.upload.BatchUpload;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,6 +58,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import util.Util;
+import workbench.DocumentTypeService;
 
 //https://spring.io/blog/2015/06/08/cors-support-in-spring-framework
 
@@ -144,28 +152,36 @@ public class HelloController {
 				
 				for (int idx = 0; idx < fileList.length; idx++) {
 					
+					File tmpFile = null;
+					
 					String extension = Util.getFileExtension(fileList[idx].getOriginalFilename());
 					
-					File tmpFile = File.createTempFile("ephesoft-tmp-file-name", extension);
-				   	System.out.println("Temp file : " + tmpFile.getAbsolutePath());
-			    	
-				   	inputStream  = fileList[idx].getInputStream();
-				   	outputStream = new FileOutputStream(tmpFile.getAbsolutePath());
-				   	
-					int read = 0;
-					byte[] bytes = new byte[1024];
-		
-					while ((read = inputStream.read(bytes)) != -1) {
-						outputStream.write(bytes, 0, read);
+					System.out.println(extension);
+					
+					if (extension.equalsIgnoreCase(".jpg") || extension.equalsIgnoreCase(".png")) {
+						tmpFile = Util.convertFileToPDF(fileList[idx]);
+					} else {
+						tmpFile = File.createTempFile("ephesoft-tmp-file-name", extension);
+						System.out.println("Temp file : " + tmpFile.getAbsolutePath());
+						
+					   	inputStream  = fileList[idx].getInputStream();
+					   	outputStream = new FileOutputStream(tmpFile.getAbsolutePath());
+					   						   	
+						int read = 0;
+						byte[] bytes = new byte[1024];
+			
+						while ((read = inputStream.read(bytes)) != -1) {
+							outputStream.write(bytes, 0, read);
+						}
+						
+						inputStream.close();
+						outputStream.close();
 					}
-					
-					inputStream.close();
-					outputStream.close();
-					
-					System.out.println("Done!");
+									
+					System.out.println("Done! " + tmpFile.toPath());
 				   	
 					FileBody   inFile = new FileBody(tmpFile);
-					StringBody bcId   = new StringBody("BC8", ContentType.TEXT_PLAIN);
+					StringBody bcId   = new StringBody("BCE", ContentType.TEXT_PLAIN);
 		
 		            HttpEntity reqEntity = MultipartEntityBuilder.create()
 		                    .addPart(inFile.getFilename(), inFile)
@@ -196,7 +212,7 @@ public class HelloController {
 						
 						System.out.println("Before fromXMLtoJSONDocument " + result.toString());
 						
-						extractResults[idx] = Util.fromXMLtoJSONDocument(result.toString());
+						extractResults[idx] = Util.fromXMLtoJSONArray(result.toString());
 					} finally {
 						response.close();
 					}
@@ -285,7 +301,7 @@ public class HelloController {
 			
 			InputStream resultInputStream = new ByteArrayInputStream(result.toString().getBytes("UTF-8"));
 			
-			Document document = saxBuilder.build(resultInputStream);
+			org.jdom.Document document = saxBuilder.build(resultInputStream);
 			
 			List<?> resultsList = document.getRootElement().getChildren("Result");
 			
@@ -300,7 +316,6 @@ public class HelloController {
 			 
 			 for (int idx = 0; idx < documentList.size(); idx++) {
 				 System.out.println(documentList.get(idx).getChildText("Type"));
-
 			 }
 			 
 
@@ -319,5 +334,72 @@ public class HelloController {
 		
 		return result.toString();
     }
-	
+
+	@CrossOrigin
+	@PostMapping("/datastore/documents")
+    public String saveDocument(@RequestParam("file") MultipartFile file, @RequestParam("data") String data) {
+		
+		String url = "http://eagle.wisepoint.info:8888/nuxeo";
+		
+		//org.nuxeo.client.api.objects.Document newDoc = null;
+		
+		try {
+			System.out.println(file.getOriginalFilename());
+			System.out.println(file.getSize());
+			
+			System.out.println(data);
+			
+			JSONObject formData = new JSONObject(data);
+			
+			String extension = Util.getFileExtension(file.getOriginalFilename());
+			
+			System.out.println(extension);
+			
+			File uploadFile = File.createTempFile("ephesoft-tmp-file-name", extension);
+			System.out.println("Temp file : " + uploadFile.getAbsolutePath());
+					        			
+			NuxeoClient nuxeoClient = new NuxeoClient(url, "Administrator", "Administrator");
+			
+			BatchUpload batchUpload = nuxeoClient.fetchUploadManager();
+			
+			FileUtils.copyInputStreamToFile(file.getInputStream(), uploadFile);
+			
+			batchUpload = batchUpload.upload(file.getName(), uploadFile.length(), extension.substring(1), batchUpload.getBatchId(), "1", uploadFile);
+			
+			String documentType = formData.getString("DocumentType");
+			
+			Map<String, String> documentTypeMapping = DocumentTypeService.getMapping(documentType);
+			
+			org.nuxeo.client.api.objects.Document document = new org.nuxeo.client.api.objects.Document(documentTypeMapping.get("ECMDocumentType"), documentTypeMapping.get("ECMDocumentType"));
+			
+			Set<String> keys = documentTypeMapping.keySet();
+			
+			document.set("dc:title", file.getOriginalFilename());
+			document.set("ld:LoanId", "7654321");
+			document.set("ld:DocumentType", documentTypeMapping.get("ECMDocumentType"));
+
+			for (String key : keys) {
+				if (documentTypeMapping.containsKey(key) && formData.has(key)) {
+					if (documentTypeMapping.get(key).endsWith("date")) {
+						System.out.println("Convert Date " + Util.convertToISO8601(formData.getString(key)));
+					} else {
+						document.set(documentTypeMapping.get(key), formData.getString(key));
+					}
+				}
+			}
+						
+			document = nuxeoClient.repository().createDocumentByPath("/default-domain/workspaces/LD_DropFolder", document);
+			
+			document.setPropertyValue("file:content", batchUpload.getBatchBlob());
+			document = document.updateDocument();
+			
+			nuxeoClient.logout();
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+		return "";
+    	
+    }
 }
