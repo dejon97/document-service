@@ -29,7 +29,7 @@ public class FileService {
 
 	public static JSONObject submitFile(String fileName) throws ClientProtocolException, IOException, JDOMException  {
 		
-		String testFileFolder = "D:\\Users\\john.mccullough\\work\\images\\TestFiles";
+		String testFileFolder = ".\\TestFiles";
 		
 		Path path = Paths.get(testFileFolder, fileName);
 		

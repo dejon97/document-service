@@ -76,7 +76,7 @@ public class Util {
 	    
 	    credsProvider.setCredentials(
 	            new AuthScope(httpHost.getHostName(), httpHost.getPort()),
-	            new UsernamePasswordCredentials("ephesoft", "demo"));
+	            new UsernamePasswordCredentials("ephesoft", "themesoft"));
 	    
 	    CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider).build();
 	    

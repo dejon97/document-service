@@ -84,7 +84,7 @@ public class HelloController {
 		
 		HttpHost httpHost = Util.getHttpHost();
 		
-		String url = "http://ephesoft.dev.promontech.com/dcma/rest/getBatchClassList";
+		String url = "http://ephesoft0002.dev.promontech.com:8080/dcma/rest/getBatchClassList";
 		HttpGet request = new HttpGet(url);
 		
 		CloseableHttpClient httpClient = Util.getHttpClient(httpHost);
@@ -132,7 +132,7 @@ public class HelloController {
 		
 		//String url = "http://ephesoft.dev.promontech.com/dcma/rest/initiateOcrClassifyExtract";
 		
-		String url = "http://ephesoft.dev.promontech.com/dcma/rest/ocrClassifyExtract";
+		String url = "http://ephesoft0002.dev.promontech.com:8080/dcma/rest/ocrClassifyExtract";
 		
 		HttpPost request = new HttpPost(url);
 		
@@ -181,7 +181,7 @@ public class HelloController {
 					System.out.println("Done! " + tmpFile.toPath());
 				   	
 					FileBody   inFile = new FileBody(tmpFile);
-					StringBody bcId   = new StringBody("BCE", ContentType.TEXT_PLAIN);
+					StringBody bcId   = new StringBody("BC7", ContentType.TEXT_PLAIN);
 		
 		            HttpEntity reqEntity = MultipartEntityBuilder.create()
 		                    .addPart(inFile.getFilename(), inFile)
