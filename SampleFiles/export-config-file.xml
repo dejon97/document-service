@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ImportBatchClassOptions>
+	<RolesImported>false</RolesImported>
+	<EmailAccounts>true</EmailAccounts>
+	<UseSource>false</UseSource>
+	<Name>BC9</Name>
+	<Description>Description </Description>
+	<Priority>10</Priority>
+	<UseExisting>false</UseExisting>
+	<UncFolder>F:\Ephesoft\SharedFolders\bc9unc</UncFolder>
+	<UseKey>false</UseKey>
+	<BatchClassKey>key</BatchClassKey>
+	<EncryptionAlgorithm>NONE</EncryptionAlgorithm>
+	<importWithLearnFiles>true</importWithLearnFiles>
+
+	<BatchClassDefinition>
+		<Scripts>
+			<Script>
+				<FileName>ScriptDocumentAssembler.java</FileName>
+				<Selected>true</Selected>
+			</Script>
+			<Script>
+				<FileName>ScriptPageProcessing.java</FileName>
+				<Selected>true</Selected>
+			</Script>
+		</Scripts>
+
+		<Folders>
+			<Folder>
+				<FileName>image-classification-sample</FileName>
+				<Selected>false</Selected>
+			</Folder>
+		</Folders>
+
+		<BatchClassModules>
+			<BatchClassModule>
+				<ModuleName />
+				<PluginConfiguration>true</PluginConfiguration>
+			</BatchClassModule>
+		</BatchClassModules>
+	</BatchClassDefinition>
+
+</ImportBatchClassOptions>
