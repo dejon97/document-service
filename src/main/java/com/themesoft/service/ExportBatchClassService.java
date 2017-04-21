@@ -6,9 +6,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
@@ -17,6 +21,9 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import util.Util;
 
 
@@ -28,65 +35,58 @@ public class ExportBatchClassService {
                 String url= "http://ephesoft0002.dev.promontech.com:8080/dcma/rest/exportBatchClass";
  
                 HttpPost request=new HttpPost(url);
+                
                 CloseableHttpClient httpClient = Util.getHttpClient(httpHost);
                 try{
-                StringBody bcId   = new StringBody("BC7", ContentType.TEXT_PLAIN);
-                HttpEntity reqEntity = MultipartEntityBuilder.create()
-                .addPart("batchClassIdentifier", bcId)
-                .build();
-                request.setEntity(reqEntity);
-      
+                List<NameValuePair> nvps= new ArrayList<NameValuePair>();
+                nvps.add(new BasicNameValuePair("identifier","BC7"));
+                nvps.add(new BasicNameValuePair("lucene-search-classification-sample","true"));
+                nvps.add(new BasicNameValuePair("image-classification-sample","false"));
+                request.setEntity(new UrlEncodedFormEntity(nvps,HTTP.UTF_8));
                 
                 HttpClientContext localContext = Util.getLocalContent(httpHost);
                 CloseableHttpResponse response = httpClient.execute(httpHost, request, localContext); 
+               
                 
                 int statusCode = response.getStatusLine().getStatusCode();
-                StringBuffer result = new StringBuffer();
-               
-                if(statusCode == 200){
-                   System.out.println("Batch Class Exported Successfully");
-                    HttpEntity resEntity = response.getEntity();
-                    BufferedReader rd = new BufferedReader(
-					new InputStreamReader(resEntity.getContent()));
-                    String line = "";
-                while ((line = rd.readLine()) != null) {
-                    System.out.println(line);
-                    result.append(line);
-                                                        }
-                File zipBatchClass= new File("C:\\sample\\BC7output.zip");
-                FileOutputStream fos= new FileOutputStream(zipBatchClass);
-                   try{
-                       byte[] buf=new byte[1024];
-                       int len=rd.read();
-                       while(len>0){
-                       fos.write(buf,0,len);
-                       len=rd.read();
-                       }
-                   }
-                   finally{
-                       if(fos!=null){
-                           fos.close();
-                       }
-                   }
-
-                }
-                else if(statusCode == 403){
+                //StringBuffer result = new StringBuffer();
+                 if(statusCode == 200){
+                 System.out.println("Batch Class Exported Successfully");
+                 HttpEntity resEntity = response.getEntity();
+                 if(resEntity!=null){
+                 System.out.println("Response content length"+resEntity.getContentLength());
+                 String responseBody=EntityUtils.toString(resEntity);
+                 System.out.println("Data:"+responseBody);
+                 
+                 File zip= new File("C:\\sample\\BC7output.zip");
+                 FileOutputStream fos= new FileOutputStream(zip);
+                 
+                 try{
+                 byte[] buf=new byte[1024];
+                 int len=responseBody.getBytes().length;
+                 while(len>0){
+                 fos.write(buf, 0 , len);
+                 len=responseBody.getBytes().length;
+                 }
+                 }
+                 finally{if(fos!=null)fos.close();}
+                 }
+                 }
+                 else if(statusCode == 403)
+                     System.out.println("Invalid Username/Password");
+                 else
+                     System.out.println(response.toString()); 
                 
-                System.out.println("Invalid Username/Password");
-                }
-                else {
-				System.out.println(response.toString());
-			}	
                 }
                 catch(Exception e){
-                    e.printStackTrace();
+                e.printStackTrace();
                 }
                 finally {
-            try {
-            	httpClient.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-        }
+                    try {
+                        httpClient.close();
+                        } catch (IOException e) {
+                                        e.printStackTrace();
+                                                }
+                        }
         }
 }
