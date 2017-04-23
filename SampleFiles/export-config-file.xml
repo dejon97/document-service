@@ -3,11 +3,11 @@
 	<RolesImported>false</RolesImported>
 	<EmailAccounts>true</EmailAccounts>
 	<UseSource>false</UseSource>
-	<Name>BC9</Name>
-	<Description>Description </Description>
+	<Name>Import_Batch_Test_02</Name>
+	<Description>Imported Batch via Web Service</Description>
 	<Priority>10</Priority>
 	<UseExisting>false</UseExisting>
-	<UncFolder>F:\Ephesoft\SharedFolders\bc9unc</UncFolder>
+	<UncFolder>c:\Ephesoft\DropFolders\IMPORT_TEST_02</UncFolder>
 	<UseKey>false</UseKey>
 	<BatchClassKey>key</BatchClassKey>
 	<EncryptionAlgorithm>NONE</EncryptionAlgorithm>

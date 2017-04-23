@@ -26,8 +26,8 @@ public class ImportBatchClassService {
 		CloseableHttpClient httpClient = Util.getHttpClient(httpHost);
 		
 		try {
-			File configFile        = new File("C:\\sample\\sample.xml");
-			File zipBatchClassFile = new File("C:\\sample\\BC4_021315_118.zip");
+			File configFile        = new File(".\\SampleFiles\\export-config-file.xml");
+			File zipBatchClassFile = new File("D:\\Users\\john.mccullough\\tmp\\BC7output.zip");
 						
 			FileBody configBody        = new FileBody(configFile);
 			FileBody zipBatchClassBody = new FileBody(zipBatchClassFile);
