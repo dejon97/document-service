@@ -115,7 +115,62 @@ public class Util {
 					extractedData.put(fieldNode.getChild("Name").getValue(), fieldNode.getChild("Value").getValue()); 
 				}
 				
+				Element dataTableElement = documentList.get(idx).getChild("DataTables");
+				
+				if (dataTableElement != null) {
+					@SuppressWarnings("unchecked")
+					List<Element> dataTableList = dataTableElement.getChildren();
+					
+					JSONArray dataTables = new JSONArray();
+					
+					for (int idxDataTable = 0; idxDataTable < dataTableList.size(); idxDataTable++) {			
+						String tableName = dataTableList.get(idxDataTable).getChild("Name").getValue();
+						
+						System.out.println("Table Name: " + tableName);
+						
+						JSONArray dataTableData = new JSONArray();
+						
+						@SuppressWarnings("unchecked")
+						List<Element> rowList = dataTableList.get(idxDataTable).getChild("Rows").getChildren();
+						
+						for (int idxRow = 0; idxRow < rowList.size(); idxRow++) {
+							
+							JSONObject dataTableRow = new JSONObject();
+							
+							@SuppressWarnings("unchecked")
+							List<Element> colList = rowList.get(idxRow).getChild("Columns").getChildren();	
+							
+							for (int idxCol = 0; idxCol < colList.size(); idxCol++) {
+								String colName  = colList.get(idxCol).getChild("Name").getValue();
+								String colValue = ((colList.get(idxCol).getChild("Value") != null) ? colList.get(idxCol).getChild("Value").getValue() : "");
+								
+								dataTableRow.put(colName, colValue);
+								
+								//System.out.println(colList.get(idxCol).getChild("Name").getValue() + " = " + ((colList.get(idxCol).getChild("Value") != null) ? colList.get(idxCol).getChild("Value").getValue() : ""));				
+							}
+							
+							if (dataTableRow.length() > 0) {
+								dataTableData.put(dataTableRow);
+							}
+						}
+						
+						if (dataTableData.length() > 0) {
+							JSONObject dataTableObject = new JSONObject();
+							
+							dataTableObject.put("TableName", tableName);
+							dataTableObject.put("TableData", dataTableData);
+							
+							dataTables.put(dataTableObject);
+						}
+					}
+					
+					if (dataTables.length() > 0) {
+						extractedData.put("DataTables", dataTables);
+					}
+				}
+				
 			 }
+						 
 		 }
 		 
 		 return extractedData;
