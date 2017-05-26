@@ -19,14 +19,15 @@ public class ImportBatchClassService {
 	public static void main(String[] args) {
 		HttpHost httpHost = Util.getHttpHost();
 		
-		String url = "http://ephesoft0002.dev.promontech.com:8080/dcma/rest/importBatchClass";
-		
-		HttpPost request = new HttpPost(url);
+		String serviceCall = String.format("%s://%s/%s", 
+				httpHost.getSchemeName(), httpHost.getHostName(), "dcma/rest/importBatchClass");
+
+		HttpPost request = new HttpPost(serviceCall);
 		
 		CloseableHttpClient httpClient = Util.getHttpClient(httpHost);
 		
 		try {
-			File configFile        = new File(".\\SampleFiles\\export-config-file.xml");
+			File configFile        = new File(".\\SampleFiles\\import-config-file.xml");
 			File zipBatchClassFile = new File("D:\\Users\\john.mccullough\\tmp\\BC7output.zip");
 						
 			FileBody configBody        = new FileBody(configFile);

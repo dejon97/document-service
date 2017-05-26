@@ -38,19 +38,20 @@ public class FileService {
 		File submitFile = path.toFile();
 				
 		HttpHost httpHost = Util.getHttpHost();
-				
-		//String url = "http://ephesoft.dev.promontech.com/dcma/rest/ocrClassifyExtract";
+						
+		String serviceCall = String.format("%s://%s/%s", 
+				httpHost.getSchemeName(), httpHost.getHostName(), "dcma/rest/ocrClassifyExtract");
 		
-		String url = "http://ephesoft0002.dev.promontech.com:8080/dcma/rest/ocrClassifyExtract";
-		
-		HttpPost request = new HttpPost(url);
+		System.out.println(serviceCall);
+	
+		HttpPost request = new HttpPost(serviceCall);
 		
 		CloseableHttpClient httpClient = Util.getHttpClient(httpHost);
 		
 		JSONObject extractResults = new JSONObject();
 		
 		FileBody   inFile = new FileBody(submitFile);
-		//StringBody bcId   = new StringBody("BCE", ContentType.TEXT_PLAIN);
+
 		StringBody bcId   = new StringBody("BC7", ContentType.TEXT_PLAIN);
 
         HttpEntity reqEntity = MultipartEntityBuilder.create()
@@ -64,25 +65,33 @@ public class FileService {
         
 		CloseableHttpResponse response = httpClient.execute(httpHost, request, localContext);
 		
-		StringBuffer result = new StringBuffer();
-		
 		try {
-			HttpEntity resEntity = response.getEntity();
-			
-			BufferedReader rd = new BufferedReader(
-					new InputStreamReader(resEntity.getContent()));
-			
-			String line = "";
-			while ((line = rd.readLine()) != null) {
-				System.out.println(line);
-				result.append(line);
+			if (response.getStatusLine().getStatusCode() == 200) {
+				HttpEntity resEntity = response.getEntity();
+				
+				BufferedReader rd = new BufferedReader(
+						new InputStreamReader(resEntity.getContent()));
+				
+				StringBuffer result = new StringBuffer();
+				
+				String line = "";
+				while ((line = rd.readLine()) != null) {
+					System.out.println(line);
+					result.append(line);
+				}
+	
+				EntityUtils.consume(resEntity);
+				
+				System.out.println("Before fromXMLtoJSONDocument " + result.toString());
+				
+				extractResults = Util.fromXMLtoJSONObject(result.toString());
+			} else {
+				JSONObject callFailed = new JSONObject();
+				
+				callFailed.put("status", response.getStatusLine().getStatusCode());
+				
+				extractResults = callFailed;
 			}
-
-			EntityUtils.consume(resEntity);
-			
-			System.out.println("Before fromXMLtoJSONDocument " + result.toString());
-			
-			extractResults = Util.fromXMLtoJSONObject(result.toString());
 		} finally {
 			response.close();
 		}

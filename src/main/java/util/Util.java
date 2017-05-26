@@ -51,7 +51,8 @@ public class Util {
 	static { ImageIO.scanForPlugins(); }
 	
 	public static HttpHost getHttpHost() {
-		return new HttpHost("ephesoft0002.dev.promontech.com", 8080, "http");
+		//return new HttpHost("ephesoft0002.dev.promontech.com", 8080, "http");
+		return new HttpHost("ephesoft.dev.promontech.com", 443, "https");
 	}
 	
 	public static HttpClientContext getLocalContent(HttpHost httpHost) {

@@ -51,9 +51,10 @@ public class ExportBatchClassService {
 				  
 		HttpHost httpHost = Util.getHttpHost();
 
-		String url = "http://ephesoft0002.dev.promontech.com:8080/dcma/rest/exportBatchClass";
+		String serviceCall = String.format("%s://%s/%s", 
+				httpHost.getSchemeName(), httpHost.getHostName(), "dcma/rest/exportBatchClass");
 
-		HttpPost request = new HttpPost(url);
+		HttpPost request = new HttpPost(serviceCall);
 
 		CloseableHttpClient httpClient = Util.getHttpClient(httpHost);
 		try {
